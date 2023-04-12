@@ -48,5 +48,5 @@ echo "server {
     }
 }" | sudo tee /etc/nginx/sites-available/default
 
-# Restart Nginx
-sudo service nginx restart
+# Start Nginx
+sudo service nginx start
