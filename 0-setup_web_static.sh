@@ -25,6 +25,9 @@ sudo touch /data/web_static/releases/test/index.html
 echo "Test Page" | sudo tee /data/web_static/releases/test/index.html
 
 # Create the symbolic link and give ownership to ubuntu user and group
+if [ -L /data/web_static/current ]; then
+    sudo rm /data/web_static/current
+fi
 sudo ln -sf /data/web_static/releases/test/ /data/web_static/current
 sudo chown -R ubuntu:ubuntu /data/
 
@@ -33,7 +36,7 @@ echo "server {
     listen 80 default_server;
     listen [::]:80 default_server;
 
-    root /var/www/html;
+    root /data/;
 
     index index.html index.htm index.nginx-debian.html;
 
