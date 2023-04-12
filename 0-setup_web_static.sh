@@ -12,6 +12,7 @@
 #     restart Nginx
 # curl localhost/hbnb_static/index.html should return sample text"
 
+#!/usr/bin/env bash
 
 # Install Nginx if it's not already installed
 if [ ! -x /usr/sbin/nginx ]; then
@@ -30,7 +31,19 @@ sudo ln -sf /data/web_static/releases/test/ /data/web_static/current
 sudo chown -R ubuntu:ubuntu /data/
 
 # Update Nginx configuration
-echo "listen 80 ;/a\\n\tlocation /hbnb_static/ {\n\t\talias /data/web_static/current/;\n\t}\n" |sudo tee /etc/nginx/sites-available/kambastudio.tech
+echo "server {
+    listen 80;
+    listen [::]:80;
+    server_name kambastudio.tech;
+
+    location /hbnb_static/ {
+        alias /data/web_static/current/;
+    }
+}" | sudo tee /etc/nginx/sites-available/kambastudio.tech
+
+# Create a symbolic link to the configuration file
+sudo ln -sf /etc/nginx/sites-available/kambastudio.tech /etc/nginx/sites-enabled/kambastudio.tech
 
 # Restart Nginx
 sudo service nginx restart
+
