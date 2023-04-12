@@ -36,8 +36,20 @@ sudo ln -sf /data/web_static/releases/test/ /data/web_static/current
 sudo chown -R ubuntu:ubuntu /data/
 
 # Update Nginx configuration
-echo "location /hbnb_static/ {
-    alias /data/web_static/current/;
+echo "server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    root /data/;
+
+    index index.html index.htm index.nginx-debian.html;
+
+    server_name _;
+
+    location /hbnb_static {
+        alias /data/web_static/current/;
+        index index.html;
+    }
 }" | sudo tee /etc/nginx/sites-available/default > /dev/null
 
 # Restart Nginx
