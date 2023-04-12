@@ -12,10 +12,14 @@
 #     restart Nginx
 # curl localhost/hbnb_static/index.html should return sample text"
 
+# Exit immediately if any command exits with a non-zero status
+set -e
+
 # Install Nginx if it's not already installed
 if [ ! -x /usr/sbin/nginx ]; then
     sudo apt-get update
     sudo apt-get -y install nginx
+    sudo service nginx start
 fi
 
 # Create the required directories if they don't exist
@@ -32,21 +36,13 @@ sudo ln -sf /data/web_static/releases/test/ /data/web_static/current
 sudo chown -R ubuntu:ubuntu /data/
 
 # Update Nginx configuration
-echo "server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
+echo "location /hbnb_static/ {
+    alias /data/web_static/current/;
+}" | sudo tee /etc/nginx/sites-available/default > /dev/null
 
-    root /data/;
+# Restart Nginx
+sudo service nginx restart
 
-    index index.html index.htm index.nginx-debian.html;
+# Exit successfully
+exit 0
 
-    server_name _;
-
-    location /hbnb_static/ {
-        alias /data/web_static/current/;
-        index index.html;
-    }
-}" | sudo tee /etc/nginx/sites-available/default
-
-# Start Nginx
-sudo service nginx start
