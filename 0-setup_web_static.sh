@@ -12,14 +12,25 @@
 #     restart Nginx
 # curl localhost/hbnb_static/index.html should return sample text"
 
-ADD_WEBSTATIC="\\\tlocation /hbnb_static/ {\n\t\talias /data/web_static/current/;\n\t}\n"
 
-sudo apt-get update
-sudo apt-get -y upgrade
-sudo apt-get -y install nginx
-sudo mkdir -p /data/web_static/releases/test /data/web_static/shared
-echo "Test index.html file to test Nginx config" | sudo tee /data/web_static/releases/test/index.html
+# Install Nginx if it's not already installed
+if [ ! -x /usr/sbin/nginx ]; then
+    sudo apt-get update
+    sudo apt-get -y install nginx
+fi
+
+# Create the required directories if they don't exist
+sudo mkdir -p /data/web_static/releases/test/
+sudo mkdir -p /data/web_static/shared/
+sudo touch /data/web_static/releases/test/index.html
+echo "Test Page" | sudo tee /data/web_static/releases/test/index.html
+
+# Create the symbolic link and give ownership to ubuntu user and group
 sudo ln -sf /data/web_static/releases/test/ /data/web_static/current
-sudo chown -hR ubuntu:ubuntu /data/
-sudo sed -i "35i $ADD_WEBSTATIC" /etc/nginx/sites-available/default
-sudo service nginx start
+sudo chown -R ubuntu:ubuntu /data/
+
+# Update Nginx configuration
+sudo sed -i '/^ listen 80 default_server;/a\\n\tlocation /hbnb_static/ {\n\t\talias /data/web_static/current/;\n\t}\n' /etc/nginx/sites-available/default
+
+# Restart Nginx
+sudo service nginx restart
