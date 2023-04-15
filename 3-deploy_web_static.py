@@ -1,57 +1,87 @@
 #!/usr/bin/python3
-"""
-Fabric script methods:
-    do_pack: packs web_static/ files into .tgz archive
-    do_deploy: deploys archive to webservers
-    deploy: do_packs && do_deploys
-Usage:
-    fab -f 3-deploy_web_static.py deploy -i my_ssh_private_key -u ubuntu
-"""
-from fabric.api import local, env, put, run
-from time import strftime
-import os.path
+from fabric.api import env, put, run, local
+from os.path import exists
+from datetime import datetime
+
 env.hosts = ['54.197.82.225', '54.157.180.23']
+env.user = 'ubuntu'
+env.key_filename = '~/.ssh/school'
 
 
 def do_pack():
-    """generate .tgz archive of web_static/ folder"""
-    timenow = strftime("%Y%M%d%H%M%S")
+    """
+    Creates a .tgz archive from the contents of the web_static folder.
+
+    Returns:
+        Path to the created archive on success, None on failure.
+    """
     try:
-        local("mkdir -p versions")
-        filename = "versions/web_static_{}.tgz".format(timenow)
-        local("tar -cvzf {} web_static/".format(filename))
-        return filename
+        timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+        archive_path = 'versions/web_static_{}.tgz'.format(timestamp)
+        local('mkdir -p versions')
+        local('tar -czvf {} web_static'.format(archive_path))
+        return archive_path
     except:
         return None
 
 
 def do_deploy(archive_path):
     """
-    Deploy archive to web server
+    Distributes an archive to your web servers.
+
+    Args:
+        archive_path: The path to the archive to deploy.
+
+    Returns:
+        True if all operations have been done correctly, False otherwise.
     """
-    if os.path.isfile(archive_path) is False:
+    if not exists(archive_path):
         return False
+
     try:
-        filename = archive_path.split("/")[-1]
-        no_ext = filename.split(".")[0]
-        path_no_ext = "/data/web_static/releases/{}/".format(no_ext)
-        symlink = "/data/web_static/current"
-        put(archive_path, "/tmp/")
-        run("mkdir -p {}".format(path_no_ext))
-        run("tar -xzf /tmp/{} -C {}".format(filename, path_no_ext))
-        run("rm /tmp/{}".format(filename))
-        run("mv {}web_static/* {}".format(path_no_ext, path_no_ext))
-        run("rm -rf {}web_static".format(path_no_ext))
-        run("rm -rf {}".format(symlink))
-        run("ln -s {} {}".format(path_no_ext, symlink))
+        # Upload the archive to the temporary directory on the web server
+        put(archive_path, '/tmp/')
+
+        # Extract the archive to a new folder on the web server
+        archive_filename = archive_path.split('/')[-1]
+        archive_foldername = archive_filename.split('.')[0]
+        run('sudo mkdir -p /data/web_static/releases/{}'.format(
+            archive_foldername))
+        run('sudo tar -xzf /tmp/{} -C /data/web_static/releases/{}/'
+            .format(archive_filename, archive_foldername))
+
+        # Delete the archive from the web server
+        run('sudo rm /tmp/{}'.format(archive_filename))
+
+        # Move the contents of the extracted folder to the web server's
+        # web_static directory and delete the extracted folder
+        run('sudo mv /data/web_static/releases/{}/web_static/* '
+            '/data/web_static/releases/{}/'.format(
+                archive_foldername, archive_foldername))
+        run('sudo rm -rf /data/web_static/releases/{}/web_static'
+            .format(archive_foldername))
+
+        # Delete the symbolic link to the current web server version
+        run('sudo rm -rf /data/web_static/current')
+
+        # Create a new symbolic link to the new version of the web server
+        run('sudo ln -s /data/web_static/releases/{}/ '
+            '/data/web_static/current'.format(archive_foldername))
+
         return True
+
     except:
         return False
 
 
 def deploy():
+    """
+    Creates and distributes an archive to your web servers.
+
+    Returns:
+        True if all operations have been done correctly, False otherwise.
+    """
     archive_path = do_pack()
-    if archive_path is None:
+    if not archive_path:
         return False
-    success = do_deploy(archive_path)
-    return success
+    return do_deploy(archive_path)
