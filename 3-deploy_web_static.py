@@ -7,10 +7,10 @@ Fabric script methods:
 Usage:
     fab -f 3-deploy_web_static.py deploy -i my_ssh_private_key -u ubuntu
 """
-from fabric.api import local, env, put, run
+from fabric import local, env, put, run
 from time import strftime
 import os.path
-env.hosts = ['35.229.54.225', '35.231.225.251']
+env.hosts = ['54.197.82.225', '54.157.180.23']
 
 
 def do_pack():

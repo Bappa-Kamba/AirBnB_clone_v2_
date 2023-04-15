@@ -8,17 +8,17 @@ All archives must be stored in the folder 'versions' (create folder if none)
 Create archive "web_static_<year><month><day><hour><minute><second>.tgz"
 The function do_pack must return the archive path, else return None
 """
-from fabric.api import local
-from time import strftime
+from fabric import local
+from datetime import datetime
 
 
 def do_pack():
-    """generate .tgz archive of web_static/ folder"""
-    timenow = strftime("%Y%M%d%H%M%S")
+    """Packs the contents of the web_static folder into a tarball"""
     try:
+        now = datetime.now().strftime("%Y%m%d%H%M%S")
         local("mkdir -p versions")
-        filename = "versions/web_static_{}.tgz".format(timenow)
-        local("tar -cvzf {} web_static/".format(filename))
+        filename = "versions/web_static_{}.tgz".format(now)
+        local("tar -czvf {} web_static".format(filename))
         return filename
     except:
         return None

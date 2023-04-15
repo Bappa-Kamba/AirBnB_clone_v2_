@@ -7,9 +7,9 @@ Usage:
     do_deploy:archive_path=versions/web_static_20170315003959.tgz
     -i my_ssh_private_key -u ubuntu
 """
-from fabric.api import env, put, run
+from fabric import env, put, run
 import os.path
-env.hosts = ['35.229.54.225', '35.231.225.251']
+env.hosts = ['54.197.82.225', '54.157.180.23']
 
 
 def do_deploy(archive_path):

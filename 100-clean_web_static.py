@@ -8,10 +8,10 @@ Fabric script methods:
 Usage:
     fab -f 3-deploy_web_static.py do_clean:n=2 -i my_ssh_private_key -u ubuntu
 """
-from fabric.api import local, env, put, run
+from fabric import local, env, put, run
 from time import strftime
 import os.path
-env.hosts = ['35.229.54.225', '35.231.225.251']
+env.hosts = ['54.197.82.225', '54.157.180.23']
 
 
 def do_pack():
@@ -62,8 +62,8 @@ def do_clean(number=0):
     if number == 0:
         number = 1
     with cd.local('./versions'):
-            local("ls -lt | tail -n +{} | rev | cut -f1 -d" " | rev | \
+        local("ls -lt | tail -n +{} | rev | cut -f1 -d" " | rev | \
             xargs -d '\n' rm".format(1 + number))
     with cd('/data/web_static/releases/'):
-            run("ls -lt | tail -n +{} | rev | cut -f1 -d" " | rev | \
+        run("ls -lt | tail -n +{} | rev | cut -f1 -d" " | rev | \
             xargs -d '\n' rm".format(1 + number))
