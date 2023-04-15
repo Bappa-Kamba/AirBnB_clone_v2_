@@ -8,7 +8,7 @@ Fabric script methods:
 Usage:
     fab -f 3-deploy_web_static.py do_clean:n=2 -i my_ssh_private_key -u ubuntu
 """
-from fabric import local, env, put, run
+from fabric.api import local, env, put, run
 from time import strftime
 import os.path
 env.hosts = ['54.197.82.225', '54.157.180.23']

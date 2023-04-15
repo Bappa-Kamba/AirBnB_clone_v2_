@@ -8,7 +8,7 @@ All archives must be stored in the folder 'versions' (create folder if none)
 Create archive "web_static_<year><month><day><hour><minute><second>.tgz"
 The function do_pack must return the archive path, else return None
 """
-from fabric.connection import local
+from fabric.api import local
 from datetime import datetime
 
 
